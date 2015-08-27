@@ -1,10 +1,11 @@
 // model
 var model = (function(){
 
+  var snakePos;
   var board = generateBoard();
 
   // Snake starts at size 3.
-  var startingLength = 3;
+  var snakeLength = 3;
 
   // Generate a 10x10 board.
   function generateBoard(){
@@ -18,6 +19,7 @@ var model = (function(){
 
   // Place the head of the snake.
   function placeSnake(inputBoard){
+    snakePos = [0, 3];
     inputBoard[0][3] = "S"
     inputBoard[0][2] = 2
     inputBoard[0][1] = 1
@@ -26,7 +28,11 @@ var model = (function(){
   // updateBoard takes an input vector and moves the snake head in that
   // direction.
   function updateBoard(dir){
-
+    //remove snake from the current position
+    //set current position to the length of the snake
+    //reduce all num on the board by 1
+    //update snake head position
+    //place snake head on the board
   }
 
   return {
@@ -72,12 +78,40 @@ var view = (function(){
 
 var controller = (function(){
 
-  var lastDirection = "up";
+  var keys = {
+      37 : keyLeft,
+      38 : keyUp,
+      39 : keyRight,
+      40 : keyDown,
+  }
+  var lastDirection = [0, 0];
+
+  function initInput() {
+    inputHandlers = {};
+    document.addEventListener('keyDown', function(e) {
+      if (keys[e.keyCode]) keys[e.keyCode]();
+    })
+  };
+
+  function keyLeft() {
+    lastDirection = [-1, 0];
+  }
+
+  function keyRight() {
+    lastDirection = [1, 0];
+  }
+
+  function keyUp() {
+    lastDirection = [0, -1];
+  }
+
+  function keyDown() {
+    lastDirection = [0, 1];
+  }
+
 
   function play(){
-    while(true){
-      // Get the last direction pressed by the player.
-      getLastDirection();
+    setInterval(function() {
 
       // Update the board according to the last direction placed.
       model.updateBoard(lastDirection);
@@ -85,11 +119,7 @@ var controller = (function(){
       // Redraw the board with updated model information.
       view.render(model.board());
 
-    }
-  }
-
-  function getLastDirection(){
-    // updates last direction;
+    }, 3000);
   }
 
 })
@@ -98,6 +128,7 @@ var controller = (function(){
 $(document).ready(function(){
   view.initDOMBoard($("#board"));
   view.render(model.board);
+  controller.initInput();
   // controller.play();
 })
 
