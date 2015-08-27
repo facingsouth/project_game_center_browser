@@ -1,7 +1,18 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
 .snake {
   position: absolute;
-  min-width: 50px;
-  min-height: 50px;
+  min-width: 25px;
+  min-height: 25px;
   color: black;
   background-color: black;
+}
+
+#board {
+  width: 500px;
+  height: 500px;
+  border: 1px solid black;
 }

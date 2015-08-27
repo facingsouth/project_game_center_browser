@@ -9,9 +9,9 @@ var model = (function(){
 
   // Generate a 10x10 board.
   function generateBoard(){
-    var newBoard = new Array(10);
+    var newBoard = new Array(20);
     for (var i = 0; i < newBoard.length; i++){
-      newBoard[i] = new Array(10);
+      newBoard[i] = new Array(20);
     }
     placeSnake(newBoard);
     return newBoard;
@@ -20,24 +20,49 @@ var model = (function(){
   // Place the head of the snake.
   function placeSnake(inputBoard){
     snakePos = [0, 3];
-    inputBoard[0][3] = "S"
-    inputBoard[0][2] = 2
-    inputBoard[0][1] = 1
+    inputBoard[0][3] = "S";
+    inputBoard[0][2] = 2;
+    inputBoard[0][1] = 1;
   }
 
   // updateBoard takes an input vector and moves the snake head in that
   // direction.
   function updateBoard(dir){
-    //remove snake from the current position
-    //set current position to the length of the snake
-    //reduce all num on the board by 1
-    //update snake head position
-    //place snake head on the board
+    removeSnake();
+    updateBody();
+
+    updateHead(dir);
+  }
+
+  //update snake head position
+  //place snake head on the board
+  function updateHead(dir){
+    snakePos[0] += dir[0];
+    snakePos[1] += dir[1];
+    board[snakePos[0]][snakePos[1]] = "S";
+  }
+
+  function removeSnake(){
+    board[snakePos[0]][snakePos[1]] = undefined;
+  }
+
+  //set current position to the length of the snake
+  //reduce all num on the board by 1
+  function updateBody(){
+    board[snakePos[0]][snakePos[1]] = snakeLength;
+    for (var x = 0; x < board.length; x++){
+      for (var y = 0; y < board[x].length; y++){
+        if (typeof(board[y][x]) === "number"){
+          board[y][x]--;
+        }
+      }
+    }
   }
 
   return {
     board: board,
     updateBoard: updateBoard,
+    snakePos: snakePos,
   };
 
 })();
@@ -61,8 +86,8 @@ var view = (function(){
           var bodyPart = document.createElement("DIV");
           bodyPart.className = 'snake';
           bodyPart = $(bodyPart);
-          bodyPart.css("top", 50 * y);
-          bodyPart.css("left", 50 * x);
+          bodyPart.css("top", 25 * y);
+          bodyPart.css("left", 25 * x);
           DOMBoard.append(bodyPart)
         }
       }
@@ -87,11 +112,12 @@ var controller = (function(){
   var lastDirection = [0, 0];
 
   function initInput() {
-    inputHandlers = {};
-    document.addEventListener('keyDown', function(e) {
-      if (keys[e.keyCode]) keys[e.keyCode]();
+    $(document).keydown('keyDown', function(e) {
+      if (keys[e.keyCode]) {
+        keys[e.keyCode]();
+      }
     })
-  };
+  }
 
   function keyLeft() {
     lastDirection = [-1, 0];
@@ -112,24 +138,31 @@ var controller = (function(){
 
   function play(){
     setInterval(function() {
+      console.log(lastDirection);
 
       // Update the board according to the last direction placed.
       model.updateBoard(lastDirection);
 
       // Redraw the board with updated model information.
-      view.render(model.board());
+      view.render(model.board);
 
-    }, 3000);
+    }, 100);
   }
 
-})
+  return {
+    initInput: initInput,
+    play: play,
+    keys: keys,
+  };
+
+})();
 
 
 $(document).ready(function(){
   view.initDOMBoard($("#board"));
   view.render(model.board);
   controller.initInput();
-  // controller.play();
+  controller.play();
 })
 
 
