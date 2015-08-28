@@ -26,3 +26,24 @@
   height: 500px;
   border: 1px solid black;
 }
+
+#score {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 500px;
+  opacity: 0.1;
+  text-align: center;
+  margin-left: 125px;
+  margin-top: -30px;
+/*  font-family: 'Orbitron', sans-serif;*/
+}
+
+
+
+
+
+
+
+
+

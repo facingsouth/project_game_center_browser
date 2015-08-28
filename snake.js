@@ -4,6 +4,7 @@ var model = (function(){
   var snakePos;
   var boardSize = 20;
   var board = generateBoard();
+  var gameOver = false;
 
   // Snake starts at size 3.
   var snakeLength = 3;
@@ -43,6 +44,8 @@ var model = (function(){
       removeSnake();
       updateBody(dir);
       updateHead(dir);
+    } else {
+      gameOver = true;
     }
   }
 
@@ -96,10 +99,20 @@ var model = (function(){
     }
   }
 
+  function calcScore() {
+    return snakeLength - 3;
+  }
+
+  function dead() {
+    return gameOver;
+  }
+
   return {
     board: board,
     updateBoard: updateBoard,
     snakePos: snakePos,
+    score: calcScore,
+    gameOver: dead
   };
 
 })();
@@ -107,9 +120,11 @@ var model = (function(){
 var view = (function(){
 
   var DOMBoard = null;
+  var DOMScore = null;
 
-  function initDOMBoard(board){
+  function initDOM(board, score){
     DOMBoard = board;
+    DOMScore = score;
   }
   // var DOMSnake = $("#snake");
 
@@ -153,9 +168,14 @@ var view = (function(){
     DOMBoard.append(square)
   }
 
+  function updateScore(score) {
+    DOMScore.text(score);
+  }
+
   return {
     render: render,
-    initDOMBoard: initDOMBoard,
+    initDOM: initDOM,
+    updateScore: updateScore,
   };
 
 })();
@@ -168,8 +188,9 @@ var controller = (function(){
       39 : keyRight,
       40 : keyDown,
   }
-  var lastDirection = [0, 0];
+  var lastDirection = null;
   var lastMovement = [0, 0];
+  var playInterval;
 
   function initInput() {
     $(document).keydown('keyDown', function(e) {
@@ -180,38 +201,55 @@ var controller = (function(){
   }
 
   function keyLeft() {
-    // if (lastMovement[0] != 1 && lastMovement[1] != 0)
+    if (!(lastMovement[0] == 1 && lastMovement[1] == 0))
     lastDirection = [-1, 0];
   }
 
   function keyRight() {
-    // if (lastMovement[0] != -1 && lastMovement[1] != 0)
+    if (!(lastMovement[0] == -1 && lastMovement[1] == 0))
     lastDirection = [1, 0];
   }
 
   function keyUp() {
-    // if (lastMovement[0] != 0 && lastMovement[1] != 1)
+    if (!(lastMovement[0] == 0 && lastMovement[1] == 1))
     lastDirection = [0, -1];
   }
 
   function keyDown() {
-    // if (lastMovement[0] != 0 && lastMovement[1] != -1)
+    if (!(lastMovement[0] == 0 && lastMovement[1] == -1))
     lastDirection = [0, 1];
   }
 
 
   function play(){
-    setInterval(function() {
+
+    playInterval = setInterval(function() {
       // console.log(lastDirection);
 
       // Update the board according to the last direction placed.
-      model.updateBoard(lastDirection);
-      lastMovement = lastDirection;
-
+      if (lastDirection != null) {
+        model.updateBoard(lastDirection);
+        lastMovement = lastDirection;
+      }
       // Redraw the board with updated model information.
-      view.render(model.board);
+      drawBoard();
 
-    }, 55);
+      checkGameOver();
+    }, 200);
+  }
+
+  function checkGameOver() {
+    console.log(model.gameOver());
+    if (model.gameOver()) {
+      alert("You Lose!");
+      clearInterval(playInterval);
+    }
+  }
+
+  function drawBoard() {
+    view.render(model.board);
+    view.updateScore(model.score());
+
   }
 
   return {
@@ -224,7 +262,7 @@ var controller = (function(){
 
 
 $(document).ready(function(){
-  view.initDOMBoard($("#board"));
+  view.initDOM($("#board"), $('#score'));
   view.render(model.board);
   controller.initInput();
   controller.play();
