@@ -2,6 +2,7 @@
 var model = (function(){
 
   var snakePos;
+  var boardSize = 20;
   var board = generateBoard();
 
   // Snake starts at size 3.
@@ -9,9 +10,9 @@ var model = (function(){
 
   // Generate a 10x10 board.
   function generateBoard(){
-    var newBoard = new Array(20);
+    var newBoard = new Array(boardSize);
     for (var i = 0; i < newBoard.length; i++){
-      newBoard[i] = new Array(20);
+      newBoard[i] = Array.apply(null, Array(boardSize)).map(function() { return 0 });
     }
     placeSnake(newBoard);
     return newBoard;
@@ -28,10 +29,13 @@ var model = (function(){
   // updateBoard takes an input vector and moves the snake head in that
   // direction.
   function updateBoard(dir){
-    removeSnake();
-    updateBody();
+    if (!((snakePos[0] + dir[0]) < 0 || (snakePos[0] + dir[0]) >= boardSize ||
+           (snakePos[1] + dir[1]) < 0 || (snakePos[1] + dir[1]) >= boardSize)){
+      removeSnake();
+      updateBody();
 
-    updateHead(dir);
+      updateHead(dir);
+    }
   }
 
   //update snake head position
@@ -43,7 +47,7 @@ var model = (function(){
   }
 
   function removeSnake(){
-    board[snakePos[0]][snakePos[1]] = undefined;
+    board[snakePos[0]][snakePos[1]] = 0;
   }
 
   //set current position to the length of the snake
@@ -52,11 +56,20 @@ var model = (function(){
     board[snakePos[0]][snakePos[1]] = snakeLength;
     for (var x = 0; x < board.length; x++){
       for (var y = 0; y < board[x].length; y++){
-        if (typeof(board[y][x]) === "number"){
-          board[y][x]--;
+        if (typeof(board[x][y]) === "number" && board[x][y] > 0){
+          board[x][y]--;
         }
       }
     }
+  }
+
+  function placeFood() {
+    var posX, posY;
+    do {
+      posX = Math.floor(Math.random()*boardSize);
+      posY = Math.floor(Math.random()*boardSize);
+    } while (board[posX][posY] != 0);
+    board[posX][posY] = 'F';
   }
 
   return {
