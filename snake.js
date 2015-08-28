@@ -15,6 +15,7 @@ var model = (function(){
       newBoard[i] = Array.apply(null, Array(boardSize)).map(function() { return 0 });
     }
     placeSnake(newBoard);
+    placeFood(newBoard);
     return newBoard;
   }
 
@@ -26,16 +27,34 @@ var model = (function(){
     inputBoard[0][1] = 1;
   }
 
+  function placeFood(inputBoard) {
+    var posX, posY;
+    do {
+      posX = Math.floor(Math.random()*boardSize);
+      posY = Math.floor(Math.random()*boardSize);
+    } while (inputBoard[posX][posY] != 0);
+    inputBoard[posX][posY] = 'F';
+  }
+
   // updateBoard takes an input vector and moves the snake head in that
   // direction.
   function updateBoard(dir){
-    if (!((snakePos[0] + dir[0]) < 0 || (snakePos[0] + dir[0]) >= boardSize ||
-           (snakePos[1] + dir[1]) < 0 || (snakePos[1] + dir[1]) >= boardSize)){
+    if (!outOfBounds(dir) && !hitSelf(dir)){
       removeSnake();
-      updateBody();
-
+      updateBody(dir);
       updateHead(dir);
     }
+  }
+
+  // Check if the snake collides with itself.
+  function hitSelf(dir){
+    var nextPos = board[snakePos[0] + dir[0]][snakePos[1] + dir[1]]
+    return (nextPos === "S" || nextPos > 0);
+  }
+
+  function outOfBounds(dir){
+    return (snakePos[0] + dir[0]) < 0 || (snakePos[0] + dir[0]) >= boardSize ||
+           (snakePos[1] + dir[1]) < 0 || (snakePos[1] + dir[1]) >= boardSize;
   }
 
   //update snake head position
@@ -52,8 +71,22 @@ var model = (function(){
 
   //set current position to the length of the snake
   //reduce all num on the board by 1
-  function updateBody(){
+  function updateBody(dir){
     board[snakePos[0]][snakePos[1]] = snakeLength;
+    if (!(movingOntoFood(dir))){
+      decrementBodyParts();
+    } else {
+      snakeLength++;
+      placeFood(board);
+    }
+  }
+
+  function movingOntoFood(dir){
+    var nextPos = board[snakePos[0] + dir[0]][snakePos[1] + dir[1]]
+    return nextPos === "F";
+  }
+
+  function decrementBodyParts(){
     for (var x = 0; x < board.length; x++){
       for (var y = 0; y < board[x].length; y++){
         if (typeof(board[x][y]) === "number" && board[x][y] > 0){
@@ -61,15 +94,6 @@ var model = (function(){
         }
       }
     }
-  }
-
-  function placeFood() {
-    var posX, posY;
-    do {
-      posX = Math.floor(Math.random()*boardSize);
-      posY = Math.floor(Math.random()*boardSize);
-    } while (board[posX][posY] != 0);
-    board[posX][posY] = 'F';
   }
 
   return {
@@ -95,16 +119,38 @@ var view = (function(){
     for (var x = 0; x < board.length; x++){
       for (var y = 0; y < board[x].length; y++){
         // If there is a snake piece to draw, draw it.
-        if (board[x][y] && (board[x][y] == "S" || parseInt(board[x][y]) > 0)){
-          var bodyPart = document.createElement("DIV");
-          bodyPart.className = 'snake';
-          bodyPart = $(bodyPart);
-          bodyPart.css("top", 25 * y);
-          bodyPart.css("left", 25 * x);
-          DOMBoard.append(bodyPart)
-        }
+        drawSquare(board, x, y);
       }
     }
+  }
+
+  function drawSquare(board, x, y){
+    square = board[x][y];
+    if (square === "S"){
+      drawSnake(x, y);
+    } else if (square === "F"){
+      drawFood(x, y);
+    } else if (parseInt(square) > 0){
+      drawSnake(x, y);
+    }
+  }
+
+  function drawSnake(x, y){
+    var square = document.createElement("DIV");
+    square.className = 'snake';
+    square = $(square);
+    square.css("top", 25 * y);
+    square.css("left", 25 * x);
+    DOMBoard.append(square)
+  }
+
+  function drawFood(x, y){
+    var square = document.createElement("DIV");
+    square.className = 'food';
+    square = $(square);
+    square.css("top", 25 * y);
+    square.css("left", 25 * x);
+    DOMBoard.append(square)
   }
 
   return {
@@ -123,6 +169,7 @@ var controller = (function(){
       40 : keyDown,
   }
   var lastDirection = [0, 0];
+  var lastMovement = [0, 0];
 
   function initInput() {
     $(document).keydown('keyDown', function(e) {
@@ -133,33 +180,38 @@ var controller = (function(){
   }
 
   function keyLeft() {
+    // if (lastMovement[0] != 1 && lastMovement[1] != 0)
     lastDirection = [-1, 0];
   }
 
   function keyRight() {
+    // if (lastMovement[0] != -1 && lastMovement[1] != 0)
     lastDirection = [1, 0];
   }
 
   function keyUp() {
+    // if (lastMovement[0] != 0 && lastMovement[1] != 1)
     lastDirection = [0, -1];
   }
 
   function keyDown() {
+    // if (lastMovement[0] != 0 && lastMovement[1] != -1)
     lastDirection = [0, 1];
   }
 
 
   function play(){
     setInterval(function() {
-      console.log(lastDirection);
+      // console.log(lastDirection);
 
       // Update the board according to the last direction placed.
       model.updateBoard(lastDirection);
+      lastMovement = lastDirection;
 
       // Redraw the board with updated model information.
       view.render(model.board);
 
-    }, 100);
+    }, 55);
   }
 
   return {
