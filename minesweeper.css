@@ -1,0 +1,40 @@
+* {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+#game-board {
+  width: 300px;
+  height: 300px;
+  border: 1px solid #000000;
+  position: absolute;
+}
+
+.square {
+  width: 26px;
+  height: 26px;
+  position: absolute;
+  border: 1px solid black;
+  text-align: center;
+  border-radius: 2px;
+}
+
+.mine {
+  background-image: url("images/mine.png");
+  background-size: cover;
+}
+
+.revealed {
+  background-color: white;
+}
+
+.hidden {
+  /*background-image: url("images/s.jpg");*/
+  background-color: grey;
+  background-size: cover;
+/*  width: 24px;
+  height: 24px;
+  box-shadow: 3px 3px 3px 3px black;*/
+  /*border-style: outset;*/
+}
