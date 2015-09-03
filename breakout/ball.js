@@ -1,7 +1,7 @@
 var BO = BO || {};
 
 BO.BallModule = (function(){
-  var _radius = 3;
+  var _radius = 5;
 
   function Ball(pos, vel) {
     this.pos = {};
@@ -17,10 +17,10 @@ BO.BallModule = (function(){
     var ctx = document.getElementById("board").getContext("2d");
     ctx.beginPath();
     ctx.arc(this.pos.x, this.pos.y, this.radius, 0, 2*Math.PI);
-    ctx.fillStyle = "yellow";
+    ctx.fillStyle = "red";
     ctx.fill();
     ctx.lineWidth = 1;
-    ctx.strokeStyle = "yellow";
+    ctx.strokeStyle = "red";
     ctx.stroke();
     // console.log("render ball");
   }
@@ -32,20 +32,18 @@ BO.BallModule = (function(){
   }
 
   Ball.prototype.tic = function() {
+    this.clear();
     this.pos.x = this.pos.x + this.vel.x;
     this.pos.y = this.pos.y + this.vel.y;
+    this.render();
   }
 
   Ball.prototype.verticalBounce = function() {
     this.vel.y *= -1;
-    // this.vel.x *= 1.01;
-    // this.vel.y *= 1.01;
   }
 
   Ball.prototype.horizontalBounce = function() {
     this.vel.x *= -1;
-    // this.vel.x *= 1.01;
-    // this.vel.y *= 1.01;
   }
 
   Ball.prototype.addVelX = function(inc) {

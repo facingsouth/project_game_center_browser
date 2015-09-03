@@ -6,84 +6,47 @@
 
 var BO = BO || {};
 
-BO.BreakoutModule = (function(){
+BO.BreakoutModule = (function(board, paddle, brickConstructor, ballConstructor){
 
   var _bricks;
   var _balls;
-  var _paddle;
+  var score = 0;
   var game;
 
   function init() {
-    _bricks = [];
-    _balls = [];
-    for (var i=0; i<7; i++) {
-      for (var j=0; j<3; j++) {
-        _bricks.push(new BO.BrickModule.Brick([30+i*35, 10+j*10]));
-        _bricks[i*3+j].render();      
-      }
-    }
+    board.init();
+    paddle.init();
 
-    var vx = Math.floor(Math.random()*5-2);
-    var vy = Math.floor(Math.random()*2-2);
+    _makeBricks();
+    _makeBalls(); 
 
-    _balls.push(new BO.BallModule.Ball([150, 125], [vx, vy]));
-    _balls[0].render();
-
-    _paddle = BO.PaddleModule;
-    _paddle.init();
-
-    // _initKeyPressListeners();
     _initKeyDownListeners();
     _initKeyUpListeners();
     // _initQuitButtonListener();
-    // _startGameLoop();
+    renderScore();
   }
 
-  function _tic(){
-    if (hitTop()) {
-      _balls[0].verticalBounce();
-    }
-    if (hitLeftOrRight()) {
-      _balls[0].horizontalBounce();
-    }
-    if (_paddle.hitBy(_balls[0])) {
-      _balls[0].verticalBounce();
-      // console.log("paddle vel");
-      // console.log(_paddle.getVel());
-      _balls[0].addVelX(_paddle.getVel()/5);
-    }
-    var counter = 0;
-    while (counter<_bricks.length) {
-      if (_bricks[counter].leftOrRightHitBy(_balls[0])) {
-        _bricks[counter].clear();
-        _bricks.splice(counter, 1);
-        _balls[0].horizontalBounce();
-      } else if (_bricks[counter].topOrBottomHitBy(_balls[0])) {
-        _bricks[counter].clear();
-        _bricks.splice(counter, 1);
-        _balls[0].verticalBounce();
-      } else {
-        counter++;
+  function _makeBricks() {
+    _bricks = [];
+    for (var i=0; i<7; i++) {
+      for (var j=0; j<3; j++) {
+        _bricks.push(new brickConstructor([i, j]));
+        _bricks[i*3+j].render();      
       }
     }
-    _balls[0].clear();
-    _balls[0].tic();
+  }
+
+  function _makeBalls() {
+    var x = board.getWidth() / 2;
+    var y = board.getHeight() - 26;
+    var vx = Math.floor(Math.random()*10-5);
+    var vy = Math.floor(Math.random()*5-5);
+    _balls = [];
+
+    _balls.push(new ballConstructor([x, y], [vx, vy]));
     _balls[0].render();
-
-    _paddle.clear();
-    _paddle.tic();
-    _paddle.render();
-
-    checkGameOver();
   }
 
-  function hitTop() {
-    return _balls[0].pos.y <= 0;
-  }
-
-  function hitLeftOrRight() {
-    return _balls[0].pos.x <= 0 || _balls[0].pos.x >= 300;
-  }
 
   function _initKeyPressListeners() {
     $(document).keypress(function(e) {
@@ -102,9 +65,9 @@ BO.BreakoutModule = (function(){
         clearInterval(game);
         _startGameLoop();
       } else if (e.keyCode === 37) {
-        _paddle.move(-1);
+        paddle.move(-1);
       } else if (e.keyCode === 39) {
-        _paddle.move(1);
+        paddle.move(1);
       }
     });
   }
@@ -114,11 +77,32 @@ BO.BreakoutModule = (function(){
       // console.log("keyup");
       // console.log(e.keyCode);
       if (e.keyCode === 37 || e.keyCode === 39) {
-        _paddle.stop();
+        paddle.stop();
       }
     });
   }
 
+  function _startGameLoop(){
+    console.log("setting up game loop");
+    game = setInterval(function(){
+      _tic();
+    }, 10)
+  }
+
+  function _tic(){
+    board.checkBounce(_balls[0]);
+    paddle.checkBounce(_balls[0]);
+
+    checkHitBricks();
+    renderScore();
+
+    _balls[0].tic();
+
+    paddle.tic();
+
+
+    checkGameOver();
+  }
   // function _initQuitButtonListener() {
   //   $("#quit").click(function() {
   //     clearInterval(game);
@@ -126,12 +110,24 @@ BO.BreakoutModule = (function(){
   //   });
   // }
 
+  function checkHitBricks() {
+    var counter = 0;
+    while (counter<_bricks.length) {
+      if (_bricks[counter].checkHitBy(_balls[0])) {
+        _bricks.splice(counter, 1);
+        score += 10;
+      } else {
+        counter++;
+      }
+    }
+  }
 
-  function _startGameLoop(){
-    console.log("setting up game loop");
-    game = setInterval(function(){
-      _tic();
-    }, 20)
+  function renderScore() {
+    var ctx = board.getContext();
+    ctx.clearRect(board.getWidth() - 150, 0, 150, 30);
+    ctx.font = "30px Arial";
+    ctx.fillStyle = "red";
+    ctx.fillText("Score: " + score, board.getWidth() - 150, 30);
   }
 
   function checkGameOver() {
@@ -147,7 +143,7 @@ BO.BreakoutModule = (function(){
   }
 
   function checkLose() {
-    if (_balls[0].pos.y + _balls[0].radius > 200){
+    if (board.hitBottom(_balls[0])){
       clearInterval(game);
       alert("You Lose!");
     }
@@ -157,4 +153,4 @@ BO.BreakoutModule = (function(){
     init: init
   }
 
-})();
+})(BO.BoardModule, BO.PaddleModule, BO.BrickModule.Brick, BO.BallModule.Ball);
