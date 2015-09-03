@@ -21,22 +21,24 @@ BO.BrickModule = (function(){
   }
 
   Brick.prototype.hitBy = function(ball) {
-    return ball.pos.x > this.pos.x - ball.radius               && 
-           ball.pos.x < this.pos.x + this.width + ball.radius  &&
-           ball.pos.y > this.pos.y - ball.radius               && 
-           ball.pos.y < this.pos.y + this.height + ball.radius;
+    return ball.pos.x >= this.pos.x - ball.radius               && 
+           ball.pos.x <= this.pos.x + this.width + ball.radius  &&
+           ball.pos.y >= this.pos.y - ball.radius               && 
+           ball.pos.y <= this.pos.y + this.height + ball.radius;
   }
 
   Brick.prototype.leftOrRightHitBy = function(ball) {
-    return (ball.pos.x === this.pos.x - ball.radius              ||
-           ball.pos.x === this.pos.x + this.width + ball.radius) &&
+    return this.hitBy(ball) &&
+          (ball.pos.x - ball.vel.x < this.pos.x - ball.radius              ||
+           ball.pos.x - ball.vel.x > this.pos.x + this.width + ball.radius) &&
            ball.pos.y >= this.pos.y - ball.radius               && 
            ball.pos.y <= this.pos.y + this.height + ball.radius;
   }
 
   Brick.prototype.topOrBottomHitBy = function(ball) {
-    return (ball.pos.y === this.pos.y - ball.radius             ||
-           ball.pos.y === this.pos.y + this.height + ball.radius) &&
+    return this.hitBy(ball) &&
+          (ball.pos.y - ball.vel.y < this.pos.y - ball.radius             ||
+           ball.pos.y - ball.vel.y > this.pos.y + this.height + ball.radius) &&
            ball.pos.x >= this.pos.x - ball.radius               && 
            ball.pos.x <= this.pos.x + this.width + ball.radius;
   }

@@ -48,6 +48,10 @@ BO.BallModule = (function(){
     // this.vel.y *= 1.01;
   }
 
+  Ball.prototype.addVelX = function(inc) {
+    this.vel.x += inc;
+  }
+
 
   return {
     Ball: Ball
