@@ -12,12 +12,12 @@
 }
 
 .square {
-  width: 26px;
-  height: 26px;
+  width: 27px;
+  height: 27px;
   position: absolute;
-  border: 1px solid black;
   text-align: center;
   border-radius: 2px;
+  border: 1px solid black;
 }
 
 .mine {
@@ -26,13 +26,14 @@
 }
 
 .revealed {
-  background-color: white;
+  background-color: #E5E6E8;
 }
 
 .hidden {
-  /*background-image: url("images/s.jpg");*/
-  background-color: grey;
+  background-image: url("images/square.jpg");
+  /*background-color: grey;*/
   background-size: cover;
+  /*border: none;*/
 /*  width: 24px;
   height: 24px;
   box-shadow: 3px 3px 3px 3px black;*/

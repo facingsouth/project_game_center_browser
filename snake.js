@@ -193,7 +193,7 @@ var controller = (function(){
   var playInterval;
 
   function initInput() {
-    $(document).keydown('keyDown', function(e) {
+    $(document).keydown(function(e) {
       if (keys[e.keyCode]) {
         keys[e.keyCode]();
       }

@@ -1,0 +1,23 @@
+#title {
+  width: 700px;
+  text-align: center;
+}
+
+#instructions {
+  width: 700px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.btn {
+  width: 100px;
+  height: 30px;
+}
+
+#board {
+  width: 700px;
+  height: 500px;
+  border: 1px solid black;
+  background-image: url("outer-space-background.jpg");
+  text-align: center;
+}

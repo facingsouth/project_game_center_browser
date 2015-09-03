@@ -9,9 +9,9 @@
 
 var model = (function(){
 
-  var boardSize = 5;
+  var boardSize = 4;
   var numOfMines = Math.floor(boardSize*boardSize/5);
-  var gameBoard = generateBoard();
+  var gameBoard = [];
   var time = 0;
   var numOfRevealed = 0;
   var lose = false;
@@ -19,7 +19,7 @@ var model = (function(){
 
   function reset() {
     gameBoard = generateBoard();
-    score = 0;
+    time = 0;
     numOfRevealed = 0;
     lose = false;
     message = "";
@@ -47,8 +47,8 @@ var model = (function(){
     var mineCount = 0;
     var posX, posY;
     while (mineCount < numOfMines) {
-      posX = rand(boardSize);
-      posY = rand(boardSize);
+      posX = rand(board.length);
+      posY = rand(board[0].length);
       if (board[posX][posY] > -1) {
         board[posX][posY] = -1;
         mineCount++;
@@ -145,11 +145,24 @@ var model = (function(){
 
   function increaseTime(val) {
     time += val;
-  }
+  };
+
+  function getGameBoard() {
+    return gameBoard;
+  };
+
+  function getBoardSize() {
+    return boardSize;
+  };
+
+  function setBoardSize(size) {
+    boardSize = size;
+  };
 
   return {
-    gameBoard: gameBoard,
-    boardSize: boardSize,
+    getGameBoard: getGameBoard,
+    setBoardSize: setBoardSize,
+    getBoardSize: getBoardSize,
     reveal: reveal,
     gameOver: gameOver,
     msg: msg,
@@ -180,6 +193,10 @@ var view = (function(){
       }
     };
 
+    listenersOn();
+  };
+
+  function listenersOn() {
     $gameBoard.on("click", ".square", function(e) {
       controller.reveal($(e.target));
     });
@@ -190,16 +207,21 @@ var view = (function(){
         label($(e.target));
       }
     });
+  };
 
-    // $("#option").click(function() {
-    //   var bs = prompt("Enter Board Size");
-    //   model.boardSize = bs;
-    //   view.init($("#game-board"), bs);
-    //   console.log(model.boardSize);
-    //   controller.play();
-    // });
+  function listenersOff() {
+    $gameBoard.off("click", ".square");
+    $gameBoard.off("mousedown", ".hidden");
+  }
 
-    // $("#start").click(controller.play);
+  function initListeners() {
+    $("#option").click(function() {
+      var bs = prompt("Enter Board Size");
+      model.setBoardSize(parseInt(bs));
+      controller.startGame();
+    });
+
+    $("#start").click(controller.startGame);
   };
 
   function render(board) {
@@ -253,8 +275,10 @@ var view = (function(){
   };
 
   return {
+    initListeners: initListeners,
     init: init,
-    render: render
+    render: render,
+    listenersOff: listenersOff
   }
 
 })();
@@ -265,41 +289,58 @@ var view = (function(){
 var controller = (function(){
   var coords, posX, posY;
   var timer;
+  // var start = false;
 
-  function play() {
-    // clearInterval(timer);
-    // model.reset();
+  function init() {
+    view.initListeners();
+    model.reset();
     view.init($("#game-board"), model.boardSize);
-    timer = setInterval(function(){
-      model.increaseTime(1);
-      view.render(model.gameBoard);
-      if (model.gameOver()) { 
-        alert(model.msg());
-        model.reset();
-        clearInterval(timer);
-      };
-      // view.render(model.gameBoard);
-    }, 1000);
   }
+
+  function startGame() {
+    view.listenersOff();
+    model.reset();
+    view.init($("#game-board"), model.boardSize);
+    // clearInterval(timer);
+    // model.reset();   
+    // view.init($("#game-board"), model.boardSize);
+    // timer = setInterval(function(){
+    //   model.increaseTime(1);
+    //   view.render(model.gameBoard);
+    //   if (model.gameOver()) { 
+    //     alert(model.msg());
+    //     model.reset();
+    //     clearInterval(timer);
+    //   };
+    //   // view.render(model.gameBoard);
+    // }, 1000);
+  };
 
   function reveal(ele) {
     coords = ele.attr("id").split("-");
     posX = parseInt(coords[0]);
     posY = parseInt(coords[1]);
     model.reveal(posX, posY);
-    view.render(model.gameBoard);
+    view.render(model.getGameBoard());
+    if (model.gameOver()) {
+    view.listenersOff(); 
+      alert(model.msg());
+      // clearInterval(timer);
+    };
   };
 
   return {
+    init: init,
     reveal: reveal,
-    play: play
+    startGame: startGame
   }
 
 })();
 
 $(document).ready(function(){
+
+  // Disable right click on the game board
   document.onmousedown=disableclick;
-  status="Right Click Disabled";
   function disableclick(event)
   {
     if(event.button==2)
@@ -308,5 +349,5 @@ $(document).ready(function(){
      }
   }
   // view.init($("#game-board"), model.boardSize);
-  controller.play();
+  controller.init();
 })
