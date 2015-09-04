@@ -1,4 +1,10 @@
+* {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 #title {
+  margin-top: 50px;
   width: 700px;
   text-align: center;
 }
@@ -16,6 +22,11 @@
   height: 30px;
 }
 
+#canvas-container {
+  width: 100%;
+  text-align:center;
+}
+
 #board {
   width: 700px;
   height: 500px;
@@ -23,5 +34,8 @@
   background-image: url("outer-space-background.jpg");
   background-size: cover;
   background-repeat: no-repeat;
-  text-align: center;
+  display: inline;
+/*  text-align: center;
+  margin-left: auto;
+  margin-right: auto;*/
 }
