@@ -6,32 +6,37 @@
 
 var BO = BO || {};
 
-BO.BreakoutModule = (function(board, paddle, brickConstructor, ballConstructor){
+BO.BreakoutModule = (function(board, paddle, player, brickConstructor, ballConstructor){
 
   var _bricks;
   var _balls;
-  var score = 0;
+  var baseSpeed = 2;
   var game;
 
   function init() {
+    player.init();
+    reset();
+    _initKeyDownListeners();
+    _initKeyUpListeners();
+    player.renderLevel();
+    player.renderScore();
+  }
+
+  function reset() {
     board.init();
     paddle.init();
 
     _makeBricks();
-    _makeBalls(); 
-
-    _initKeyDownListeners();
-    _initKeyUpListeners();
-    // _initQuitButtonListener();
-    renderScore();
+    _makeBalls();
   }
 
   function _makeBricks() {
     _bricks = [];
+    var numRows = player.getLevel() + 2;
     for (var i=0; i<7; i++) {
-      for (var j=0; j<3; j++) {
+      for (var j=0; j<numRows; j++) {
         _bricks.push(new brickConstructor([i, j]));
-        _bricks[i*3+j].render();      
+        _bricks[i*numRows+j].render();      
       }
     }
   }
@@ -39,8 +44,9 @@ BO.BreakoutModule = (function(board, paddle, brickConstructor, ballConstructor){
   function _makeBalls() {
     var x = board.getWidth() / 2;
     var y = board.getHeight() - 26;
-    var vx = Math.floor(Math.random()*10-5);
-    var vy = Math.floor(Math.random()*5-5);
+    var angle = Math.floor(Math.random()*160+10)*Math.PI/180;
+    var vx = baseSpeed * player.getLevel() * Math.cos(angle);
+    var vy = baseSpeed * player.getLevel() * Math.sin(angle);
     _balls = [];
 
     _balls.push(new ballConstructor([x, y], [vx, vy]));
@@ -59,8 +65,6 @@ BO.BreakoutModule = (function(board, paddle, brickConstructor, ballConstructor){
 
   function _initKeyDownListeners() {
     $(document).keydown(function(e) {
-      // console.log("keydown");
-      // console.log(e.keyCode);
       if (e.keyCode === 32) {
         clearInterval(game);
         _startGameLoop();
@@ -74,8 +78,6 @@ BO.BreakoutModule = (function(board, paddle, brickConstructor, ballConstructor){
 
   function _initKeyUpListeners() {
     $(document).keyup(function(e) {
-      // console.log("keyup");
-      // console.log(e.keyCode);
       if (e.keyCode === 37 || e.keyCode === 39) {
         paddle.stop();
       }
@@ -94,40 +96,27 @@ BO.BreakoutModule = (function(board, paddle, brickConstructor, ballConstructor){
     paddle.checkBounce(_balls[0]);
 
     checkHitBricks();
-    renderScore();
+    player.renderLevel();
+    player.renderScore();
 
     _balls[0].tic();
 
     paddle.tic();
 
-
+    checkClearLevel();
     checkGameOver();
   }
-  // function _initQuitButtonListener() {
-  //   $("#quit").click(function() {
-  //     clearInterval(game);
-  //     init();
-  //   });
-  // }
 
   function checkHitBricks() {
     var counter = 0;
     while (counter<_bricks.length) {
       if (_bricks[counter].checkHitBy(_balls[0])) {
         _bricks.splice(counter, 1);
-        score += 10;
+        player.addScore();
       } else {
         counter++;
       }
     }
-  }
-
-  function renderScore() {
-    var ctx = board.getContext();
-    ctx.clearRect(board.getWidth() - 150, 0, 150, 30);
-    ctx.font = "30px Arial";
-    ctx.fillStyle = "red";
-    ctx.fillText("Score: " + score, board.getWidth() - 150, 30);
   }
 
   function checkGameOver() {
@@ -135,17 +124,28 @@ BO.BreakoutModule = (function(board, paddle, brickConstructor, ballConstructor){
     checkLose();
   }
 
-  function checkWin() {
+  function checkClearLevel() {
     if (_bricks.length === 0) {
+      player.levelUp();
+      reset();
+    }
+  }
+
+  function checkWin() {
+    if (player.getLevel() > 9) {
       clearInterval(game);
-      alert("You Win!");
+      if (confirm("You are unbelievable! Play Again?")) {
+        window.location.reload();
+      };
     }
   }
 
   function checkLose() {
     if (board.hitBottom(_balls[0])){
       clearInterval(game);
-      alert("You Lose!");
+      if (confirm("You Lose! Play Again?")) {
+        window.location.reload();
+      };
     }
   }
 
@@ -153,4 +153,4 @@ BO.BreakoutModule = (function(board, paddle, brickConstructor, ballConstructor){
     init: init
   }
 
-})(BO.BoardModule, BO.PaddleModule, BO.BrickModule.Brick, BO.BallModule.Ball);
+})(BO.BoardModule, BO.PaddleModule, BO.PlayerModule, BO.BrickModule.Brick, BO.BallModule.Ball);

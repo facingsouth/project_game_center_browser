@@ -12,6 +12,7 @@ BO.BoardModule = (function(){
     ctx = board.getContext("2d");
     width = 700;
     height = 500;
+    ctx.clearRect(0, 0, width, height);
     console.log("init board");
   }
 
