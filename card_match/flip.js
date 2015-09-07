@@ -160,7 +160,7 @@ var view = {
   },
 
   flipCard: function(e) {
-    $(e.target).effect("shake", { times:3, distance: 5 }, 150);
+    // $(e.target).effect("shake", { times:3, distance: 5 }, 150);
     $(e.target).toggleClass('unflipped');
     $(e.target).toggleClass('flipped');
     controller.play(e.target);
