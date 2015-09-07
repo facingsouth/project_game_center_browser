@@ -10,3 +10,5 @@ Breakout: https://facingsouth.github.io/project_game_center_browser/breakout/bre
 Minesweeper: https://facingsouth.github.io/project_game_center_browser/minesweeper/minesweeper
 
 Snake: https://facingsouth.github.io/project_game_center_browser/snake/snake
+
+Card Match: https://facingsouth.github.io/project_game_center_browser/card_match/flip
