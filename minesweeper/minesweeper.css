@@ -4,6 +4,10 @@
   user-select: none;
 }
 
+#options {
+  /*text-align: center;*/
+}
+
 #game-board {
   width: 300px;
   height: 300px;
@@ -26,16 +30,21 @@
 }
 
 .revealed {
-  background-color: #E5E6E8;
+  background-color: white;
 }
 
 .hidden {
-  background-image: url("images/square.jpg");
-  /*background-color: grey;*/
+  /*background-image: url("images/square.jpg");*/
+  background-color: grey;
   background-size: cover;
   /*border: none;*/
 /*  width: 24px;
   height: 24px;
   box-shadow: 3px 3px 3px 3px black;*/
   /*border-style: outset;*/
+}
+
+#board-container {
+/*  width: 100%;
+  text-align:center;*/
 }

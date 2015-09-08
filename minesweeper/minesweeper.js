@@ -9,15 +9,17 @@
 
 var model = (function(){
 
-  var boardSize = 4;
-  var numOfMines = Math.floor(boardSize*boardSize/5);
-  var gameBoard = [];
-  var time = 0;
-  var numOfRevealed = 0;
-  var lose = false;
-  var message = "";
+  var boardSize;
+  var numOfMines;
+  var gameBoard;
+  var time;
+  var numOfRevealed;
+  var lose;
+  var message;
 
-  function reset() {
+  function init(bs) {
+    boardSize = bs || 10;
+    numOfMines = Math.floor(boardSize*boardSize/5);
     gameBoard = generateBoard();
     time = 0;
     numOfRevealed = 0;
@@ -166,7 +168,7 @@ var model = (function(){
     reveal: reveal,
     gameOver: gameOver,
     msg: msg,
-    reset: reset,
+    init: init,
     getTime: getTime, 
     increaseTime: increaseTime
   };
@@ -193,7 +195,7 @@ var view = (function(){
       }
     };
 
-    listenersOn();
+    initListeners();
   };
 
   function listenersOn() {
@@ -215,18 +217,23 @@ var view = (function(){
   }
 
   function initListeners() {
-    $("#option").click(function() {
-      var bs = prompt("Enter Board Size");
-      model.setBoardSize(parseInt(bs));
+    // $("#option").click(function() {
+    //   // model.setBoardSize(parseInt(bs));
+    //   listenersOff();
+    //   controller.startGame(prompt("Enter Board Size"));
+    // });
+
+    $("#start").click(function() {
+      listenersOff();
       controller.startGame();
     });
-
-    $("#start").click(controller.startGame);
   };
 
-  function render(board) {
-    $("#timer").text(model.getTime());
+  function renderTimer(time) {
+    $("#timer").text(time);
+  }
 
+  function render(board) {
     for (var i=0; i<boardSize; i++) {
       for (var j=0; j<boardSize; j++) {
         if (board[i][j] > 9){
@@ -275,9 +282,10 @@ var view = (function(){
   };
 
   return {
-    initListeners: initListeners,
     init: init,
     render: render,
+    renderTimer: renderTimer,
+    listenersOn: listenersOn,
     listenersOff: listenersOff
   }
 
@@ -292,28 +300,29 @@ var controller = (function(){
   // var start = false;
 
   function init() {
-    view.initListeners();
-    model.reset();
-    view.init($("#game-board"), model.boardSize);
+    model.init();
+    view.init($("#game-board"), model.getBoardSize());
+    view.renderTimer(model.getTime());
   }
 
-  function startGame() {
-    view.listenersOff();
-    model.reset();
-    view.init($("#game-board"), model.boardSize);
-    // clearInterval(timer);
+  function startGame(bs) {
+    clearInterval(timer);
+    model.init(bs);
+    view.init($("#game-board"), model.getBoardSize());
+    view.renderTimer(model.getTime());
+    view.listenersOn();
     // model.reset();   
     // view.init($("#game-board"), model.boardSize);
-    // timer = setInterval(function(){
-    //   model.increaseTime(1);
+    timer = setInterval(function(){
+      model.increaseTime(1);
     //   view.render(model.gameBoard);
     //   if (model.gameOver()) { 
     //     alert(model.msg());
     //     model.reset();
     //     clearInterval(timer);
     //   };
-    //   // view.render(model.gameBoard);
-    // }, 1000);
+      view.renderTimer(model.getTime());
+    }, 1000);
   };
 
   function reveal(ele) {
@@ -323,9 +332,11 @@ var controller = (function(){
     model.reveal(posX, posY);
     view.render(model.getGameBoard());
     if (model.gameOver()) {
-    view.listenersOff(); 
-      alert(model.msg());
-      // clearInterval(timer);
+      view.listenersOff(); 
+      clearInterval(timer);
+      if (confirm(model.msg()+" Play Again?")) {
+        window.location.reload();
+      };
     };
   };
 
@@ -348,6 +359,6 @@ $(document).ready(function(){
        return false;    
      }
   }
-  // view.init($("#game-board"), model.boardSize);
+
   controller.init();
 })
