@@ -12,3 +12,5 @@ Minesweeper: https://facingsouth.github.io/project_game_center_browser/minesweep
 Snake: https://facingsouth.github.io/project_game_center_browser/snake/snake
 
 Card Match: https://facingsouth.github.io/project_game_center_browser/card_match/flip
+
+Tetris: https://facingsouth.github.io/project_tetris_js/tetris
